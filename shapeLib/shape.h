@@ -80,7 +80,7 @@ void shapeInit();
  *  check: A function that determines if the AbShape contains pixelLoc when 
  *  rendered at centerPos
  */
-typedef struct AbShape_s{		/* base type for all abstrct shapes */
+typedef struct AbShape_s {		/* base type for all abstrct shapes */
   void (*getBounds)(const struct AbShape_s *shape, const Vec2 *centerPos, Region *bounds);
   int (*check)(const struct AbShape_s *shape, const Vec2 *centerPos, const Vec2 *pixelLoc);
 } AbShape;
@@ -101,6 +101,26 @@ void abShapeGetBounds(const AbShape *s, const Vec2 *centerPos, Region *bounds);
  *  \return True (1) if pixel is in the abShape centered at centerPos 
  */
 int abShapeCheck(const AbShape *shape, const Vec2 *centerPos, const Vec2 *pixelLoc);
+
+/** An AbShape Right Arrow with filled tip
+ *
+ *  size: width of the arrow.  Tip is a triangle with width=1/2 size.
+ *  The "centerPos is at the arrow's tip.
+ */
+typedef struct AbShip {
+  void (*getBounds)(const struct AbShip *shape, const Vec2 *centerPos, Region *bounds);
+  int (*check)(const struct AbShip *shape, const Vec2 *centerPos, const Vec2 *pixelLoc);
+  int size;
+} AbShip;
+
+/** As required by AbShape
+ */
+void abShipGetBounds(const AbShip *ship, const Vec2 *centerPos, Region *bounds);
+
+/** As required by AbShape
+ */
+int abShipCheck(const AbShip *ship, const Vec2 *centerPos, const Vec2 *pixel);
+
 
 /** An AbShape Right Arrow with filled tip
  *

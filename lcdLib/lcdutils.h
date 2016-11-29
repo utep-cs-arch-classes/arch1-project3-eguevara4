@@ -13,13 +13,15 @@ typedef unsigned int u_int;
 extern const unsigned char font_5x7[96][5];
 extern const unsigned char font_8x12[95][12];
 extern const unsigned int font_11x16[95][11];
+extern const unsigned int ship_Shape[16];
+extern const unsigned char font_digit[10][5];
 
 extern const unsigned int colors[43];
 
 
 /** Orientation */
 #define LONG_EDGE_PIXELS				160
-#define SHORT_EDGE_PIXELS				124
+#define SHORT_EDGE_PIXELS				128
 #define ORIENTATION_VERTICAL			0
 #define ORIENTATION_HORIZONTAL			1
 #define ORIENTATION_VERTICAL_ROTATED	2

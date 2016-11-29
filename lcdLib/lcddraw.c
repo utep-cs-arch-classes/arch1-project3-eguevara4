@@ -4,7 +4,6 @@
 #include "lcdutils.h"
 #include "lcddraw.h"
 
-
 /** Draw single pixel at x,row 
  *
  *  \param col Column to draw to
@@ -63,6 +62,49 @@ void drawChar5x7(u_char rcol, u_char rrow, char c,
   while (row < 8) {
     while (col < 5) {
       u_int colorBGR = (font_5x7[oc][col] & bit) ? fgColorBGR : bgColorBGR;
+      lcd_writeColor(colorBGR);
+      col++;
+    }
+    col = 0;
+    bit <<= 1;
+    row++;
+  }
+}
+
+void drawDigit5x7(u_char rcol, u_char rrow, char digit, 
+     u_int fgColorBGR, u_int bgColorBGR) 
+{
+  u_char col = 0;
+  u_char row = 0;
+  u_char bit = 0x01;
+  u_char oc = digit;
+
+  lcd_setArea(rcol, rrow, rcol + 4, rrow + 7); /* relative to requested col/row */
+  while (row < 8) {
+    while (col < 5) {
+      u_int colorBGR = (font_digit[oc][col] & bit) ? fgColorBGR : bgColorBGR;
+      lcd_writeColor(colorBGR);
+      col++;
+    }
+    col = 0;
+    bit <<= 1;
+    row++;
+  }
+}
+
+void drawShip(u_char rcol, u_char rrow, 
+	      u_int fgColorBGR, u_int bgColorBGR) 
+{
+  u_char col = 0;
+  u_char row = 0;
+  u_int bit = 0x0001;
+  u_char oc = 0;
+  u_int rotation = .2;
+
+  lcd_setArea(rcol, rrow, rcol + 15, rrow + 15); /* relative to requested col/row */
+  while (row < 16) {
+    while (col < 16) {
+      u_int colorBGR = (ship_Shape[col] & bit) ? fgColorBGR : bgColorBGR;
       lcd_writeColor(colorBGR);
       col++;
     }
