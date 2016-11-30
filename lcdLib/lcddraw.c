@@ -71,6 +71,7 @@ void drawChar5x7(u_char rcol, u_char rrow, char c,
   }
 }
 
+/* Draw single digit (digit) on lcd  in specified place */
 void drawDigit5x7(u_char rcol, u_char rrow, char digit, 
      u_int fgColorBGR, u_int bgColorBGR) 
 {

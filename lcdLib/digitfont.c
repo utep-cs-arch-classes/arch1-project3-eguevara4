@@ -1,5 +1,6 @@
 #include "lcdutils.h"
 
+/* used for printing single digit number on the lcd */
 const unsigned char font_digit[10][5] = {		// basic font
     { 0x3e, 0x51, 0x49, 0x45, 0x3e } // 0
   , { 0x00, 0x42, 0x7f, 0x40, 0x00 } // 1

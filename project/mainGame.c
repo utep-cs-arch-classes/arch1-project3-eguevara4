@@ -22,60 +22,60 @@
 u_int score = 0;
 u_int level = 1;
 u_int bombs = 2;
-u_char gameOn = 1;
+u_char gameOn = 1; /**< is game currently running */
 
-AbRect rect10 = {abRectGetBounds, abRectCheck, {0,1}}; /**< 10x10 rectangle */
-AbShip  ship = {abShipGetBounds, abShipCheck, 20};
+AbRect rect10 = {abRectGetBounds, abRectCheck, {0,1}}; /**< 1x3 rectangle for laser */
+AbShip  ship = {abShipGetBounds, abShipCheck, 20};     /**< ship */
 
 AbRectOutline fieldOutline = {	/* playing field */
   abRectOutlineGetBounds, abRectOutlineCheck,   
   {screenWidth/2 - 1, screenHeight/2 - 10}
 };
 
-Layer laser = {		/**< Layer with an orange circle */
+Layer laser = {		/**< Layer with an laser shape */
   (AbShape *)&rect10,
-  {(screenWidth/2)-10, screenHeight-15}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {(screenWidth/2)-10, screenHeight-15},
+  {0,0}, {0,0},				   
   COLOR_GREEN,
   0,
 };
 
-Layer layer3 = {		/**< Layer with an orange circle */
+Layer layer3 = {		/**< Layer with an red circle */
   (AbShape *)&circle6,
-  {(screenWidth/2)-30, 30}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {(screenWidth/2)-30, 30},
+  {0,0}, {0,0},				 
   COLOR_RED,
   &laser,
 };
 
-Layer layer2 = {		/**< Layer with an orange circle */
+Layer layer2 = {		/**< Layer with an red circle */
   (AbShape *)&circle6,
-  {(screenWidth/2), 30}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {(screenWidth/2), 30}, 
+  {0,0}, {0,0},				  
   COLOR_RED,
   &layer3,
 };
 
-Layer layer1 = {		/**< Layer with an orange circle */
+Layer layer1 = {		/**< Layer with an red circle */
   (AbShape *)&circle6,
-  {(screenWidth/2)+30, 30}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {(screenWidth/2)+30, 30}, 
+  {0,0}, {0,0},				
   COLOR_RED,
   &layer2,
 };
 
 Layer fieldLayer = {		/* playing field as a layer */
   (AbShape *) &fieldOutline,
-  {screenWidth/2, screenHeight/2+9},/**< center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {screenWidth/2, screenHeight/2+9},
+  {0,0}, {0,0},			   
   COLOR_GRAY,
   &layer1
 };
 
-Layer shipLayer = {		/**< Layer with a red square */
+Layer shipLayer = {		/**< Layer with a ship */
   (AbShape *)&ship,
-  {screenWidth/2-10, screenHeight-15}, /**< center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {screenWidth/2-10, screenHeight-15}, 
+  {0,0}, {0,0},			       
   COLOR_WHITE,
   &fieldLayer,
 };
@@ -91,11 +91,11 @@ typedef struct MovLayer_s {
 } MovLayer;
 
 /* initial value of {0,0} will be overwritten */
-MovLayer ml5 = { &laser, {0,0}, 0 }; 
-MovLayer ml4 = { &layer3, {-1,1}, &ml5 };
-MovLayer ml3 = { &layer2, {1,1}, &ml4 };
-MovLayer ml2 = { &layer1, {1,1}, &ml3 }; /**< not all layers move */ 
-MovLayer ml0 = { &shipLayer, {0,0}, &ml2 }; 
+MovLayer ml5 = { &laser, {0,0}, 0 };       /**< laser */
+MovLayer ml4 = { &layer3, {-1,1}, &ml5 };  /**< asteroid3 */
+MovLayer ml3 = { &layer2, {1,1}, &ml4 };   /**< asteroid2 */
+MovLayer ml2 = { &layer1, {1,1}, &ml3 };   /**< asteroid1 */ 
+MovLayer ml0 = { &shipLayer, {0,0}, &ml2 };/**< ship */ 
 
 
 
@@ -196,9 +196,10 @@ void mlAdvance(MovLayer *ml, Region *fence)
       }	/**< if outside of fence */
     } /**< for axis */
     ml->layer->posNext = newPos;
+    
     if(ml->velocity.axes[1] < -5 && ml->layer->pos.axes[1] < 50){
       ml->layer->color = COLOR_BLACK;
-    }
+    } /**< if laser too close to top boundary make the next laser black this is so the last laser image wont show */
     if(ml->velocity.axes[1] > 3){
       ml5.velocity.axes[1] = 0;
       ml5.layer->pos.axes[0] = ml0.layer->pos.axes[0];
@@ -207,13 +208,13 @@ void mlAdvance(MovLayer *ml, Region *fence)
       ml5.layer->posLast.axes[1] = ml0.layer->posLast.axes[1];
       ml5.layer->posNext.axes[0] = ml0.layer->posNext.axes[0];
       ml5.layer->posNext.axes[1] = ml0.layer->posNext.axes[1];
-    }
+    } /**< reset the position of the laser under the ship */
   } /**< for ml */
 }
 
 void adjustLevel(MovLayer *ml){
   switch(level){
-  case 1:
+  case 1: //**< level 1 velocity = {1,1} */
     if(ml->velocity.axes[0] > 0)
       ml->velocity.axes[0] = 1;
     else
@@ -223,7 +224,7 @@ void adjustLevel(MovLayer *ml){
     else
       ml->velocity.axes[1] = -1;
     break;
-  case 2:
+  case 2: //**< level 2 velocity = {2,1} */
     if(ml->velocity.axes[0] > 0)
       ml->velocity.axes[0] = 1;
     else
@@ -233,7 +234,7 @@ void adjustLevel(MovLayer *ml){
     else
       ml->velocity.axes[1] = -2;
     break;
-  case 3:
+  case 3: //**< level 3 velocity = {2,2} */
     if(ml->velocity.axes[0] > 0)
       ml->velocity.axes[0] = 2;
     else
@@ -243,7 +244,7 @@ void adjustLevel(MovLayer *ml){
     else
       ml->velocity.axes[1] = -2;
     break;
-  case 4:
+  case 4: //**< level 4 velocity = {3,2} */
     if(ml->velocity.axes[0] > 0)
       ml->velocity.axes[0] = 2;
     else
@@ -253,7 +254,7 @@ void adjustLevel(MovLayer *ml){
     else
       ml->velocity.axes[1] = -3;
     break;
-  default:
+  default: //**< level 5 (level wont go over 5)  velocity = {3,3} */
     if(ml->velocity.axes[0] > 0)
       ml->velocity.axes[0] = 3;
     else
@@ -266,56 +267,54 @@ void adjustLevel(MovLayer *ml){
   }
 }
 
+/* checks laser and ship collison with asteroids only */
 void checkCollision(MovLayer *ml){
   u_char axis;
   u_char step = 0;
   
-  ml = ml->next;
+  ml = ml->next; /**< skip first layer which is the ship */
   
   for (; ml && step < 3; ml = ml->next) {
-
     adjustLevel(ml);
     if(ml0.layer->pos.axes[0] < ml->layer->pos.axes[0] + 10 &&
         ml0.layer->pos.axes[0] > ml->layer->pos.axes[0] - 10 &&
         ml0.layer->pos.axes[1] < ml->layer->pos.axes[1] + 10 &&
         ml0.layer->pos.axes[1] > ml->layer->pos.axes[1] - 10){
-
       gameOn = 0;
       return;
-    }
+    }/**< if ship collides with asteroid */
       
-      if(ml5.layer->pos.axes[0] < ml->layer->pos.axes[0] + 7 &&
+    if(ml5.layer->pos.axes[0] < ml->layer->pos.axes[0] + 7 &&
         ml5.layer->pos.axes[0] > ml->layer->pos.axes[0] - 7 &&
         ml5.layer->pos.axes[1] < ml->layer->pos.axes[1] - 4 &&
         ml5.layer->pos.axes[1] > ml->layer->pos.axes[1] - 15){
-
-	score++;
-	if(level < 5){
-          level = (score/10)+1;
-	}else{
-	  level = 5;
-	}
-	if(score % 20 == 0){
-	  bombs++;
-	}
-	if(ml5.velocity.axes[1] < -5 && ml5.layer->pos.axes[1] < 30){
-          ml5.layer->color = COLOR_BLACK;
-        }
-	if(ml5.velocity.axes[1] < -3){
-          ml5.velocity.axes[1] = 0;
-          ml5.layer->pos.axes[0] = ml0.layer->pos.axes[0];
-	  ml5.layer->pos.axes[1] = ml0.layer->pos.axes[1]-10;
-	  ml5.layer->posLast.axes[0] = ml0.layer->posLast.axes[0];
-          ml5.layer->posLast.axes[1] = ml0.layer->posLast.axes[1];
-	  ml5.layer->posNext.axes[0] = ml0.layer->posNext.axes[0];
-	  ml5.layer->posNext.axes[1] = ml0.layer->posNext.axes[1];
-          ml5.layer->color = COLOR_BLACK;
-        }
-        ml->layer->posNext.axes[1] = 30;
-        return;
-      }/**< for axis */
+      score++;
+      if(level < 5){
+        level = (score/10)+1;
+      }else{
+	level = 5;
+      }/**< increase level */
+      if(score % 20 == 0){
+        bombs++;
+      }/**< add bomb if score is a multiple of 20 */
+      if(ml5.velocity.axes[1] < -5 && ml5.layer->pos.axes[1] < 30){
+        ml5.layer->color = COLOR_BLACK;
+      }/**< hide last laser image */
+      if(ml5.velocity.axes[1] < -3){
+        ml5.velocity.axes[1] = 0;
+        ml5.layer->pos.axes[0] = ml0.layer->pos.axes[0];
+	ml5.layer->pos.axes[1] = ml0.layer->pos.axes[1]-10;
+	ml5.layer->posLast.axes[0] = ml0.layer->posLast.axes[0];
+        ml5.layer->posLast.axes[1] = ml0.layer->posLast.axes[1];
+	ml5.layer->posNext.axes[0] = ml0.layer->posNext.axes[0];
+	ml5.layer->posNext.axes[1] = ml0.layer->posNext.axes[1];
+        ml5.layer->color = COLOR_BLACK;
+      }/**< reposition laser under ship */
+      ml->layer->posNext.axes[1] = 30; //**< move asteroid to the top */
+      return;
+    }/**< if laser collides with asteroid */
     step++;
-  }
+  }/**< for asteroid only */
 }
 
 u_int bgColor = COLOR_BLACK;     /**< The background color */
@@ -344,7 +343,8 @@ void main()
 
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
-  
+
+  /* Set initial texts for score, bombs, and level */
   drawString5x7(60,1,"Score:    0",COLOR_GRAY,COLOR_BLACK);
   drawString5x7(1,1,"Level:  1",COLOR_GRAY,COLOR_BLACK);
   drawString5x7(1,10,"Bombs:  1",COLOR_GRAY,COLOR_BLACK);
@@ -361,14 +361,15 @@ void main()
       drawString5x7(40,80,"YOU LOSE",COLOR_GRAY,COLOR_BLACK);
     }else{
       movLayerDraw(&ml0, &shipLayer);
-    }
+    }/**< if game over display 'you lose' text and do not animate anymore */
   }
 }
 
-char down = 0;
-u_int soundPeriod = 0;
-u_char soundPlaying = 0;
-u_int frequency = 500;
+char down = 0; /**< used to check if bomb button was pressed */
+u_int soundPeriod = 0; /**< counter for sound length */
+u_char soundPlaying = 0; /**< is sound currently playing? */
+u_int frequency = 500; /**< start frequency of the note that is played */
+
 /** Watchdog timer interrupt handler. 15 interrupts/sec */
 void wdt_c_handler()
 {
@@ -379,13 +380,15 @@ void wdt_c_handler()
     soundPeriod++;
     frequency += 100;
     speaker_set_period(frequency);
-  }
+  }/**< if sound is playing increase note frequency*/
+  
   if(soundPeriod > 20){
     soundPeriod = 0;
     soundPlaying = 0;
     frequency = 200;
     speaker_set_period(0);
-  }
+  }/**< if sound has played for a certain cycles then stop the sound */
+  
   if (count == 15) {
     u_int switches = p2sw_read();
     if(!gameOn){
@@ -406,10 +409,12 @@ void wdt_c_handler()
     }else{
       ml0.velocity.axes[0] = 0;
       ml5.velocity.axes[0] = 0;
-    }
+    }/**< if S1 is down move ship left else if S2 is down move ship right else dont move the ship */
+    
     if(~switches & 4){
       down = 1;
-    }
+    }/**< if S3 was pressed mark that it was pressed */
+    
     if(switches & 4 && down){
       if(bombs > 0){
 	bombs--;
@@ -420,7 +425,8 @@ void wdt_c_handler()
 	level = (score/10)+1;
       }
       down = 0;
-    }
+    }/**< if S3 is up and was previously down then drop bomb (this is like hitting all three asteroids at the same time) */
+    
     if(~switches & 8){
       if(ml5.velocity.axes[1] == 0){
 	ml5.velocity.axes[1] = -8;
@@ -435,7 +441,8 @@ void wdt_c_handler()
 	speaker_set_period(frequency);
 	soundPlaying = 1;
       }
-    }
+    }/**< if S4 is down fire laser by setting its vertical velocity to -8 (Also begin making sound) */
+    
     redrawScreen = 1;
     count = 0;
   }
