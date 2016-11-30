@@ -1,5 +1,5 @@
 # Project 3: LCD Game
-# Project code resides in project, lcdLib, and shapeLib directories
+## Project code resides in project, lcdLib, and shapeLib directories
 
 ## Introduction
 Continuing your effort to help ACME Solutions provide Christmas toys, your task is now to develop a game for the LCD screen.  You should utilize the knowledge you have gained working with the buttons and buzzer.  In addition, a series of libraries have been found to assist you in creating your game.
