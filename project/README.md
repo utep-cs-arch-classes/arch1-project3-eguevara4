@@ -52,3 +52,19 @@ When a bomb is used it counts as 3 points and all asteroids are destroyed.
 Every 20 points a bomb is awarded.
 Every 10 points the level is increased.
 Once an asteroid crashes into the ship the game is over and the game must be reset.
+
+# Switch ship moving state
+if (~switches & 1){
+  ml0.velocity.axes[0] = -3;
+  if(ml5.velocity.axes[1] == 0){
+    ml5.velocity.axes[0] = -3;
+  }
+}else if(~switches & 2){
+  ml0.velocity.axes[0] = 3;
+  if(ml5.velocity.axes[1] == 0){
+    ml5.velocity.axes[0] = 3;
+  }
+}else{
+  ml0.velocity.axes[0] = 0;
+  ml5.velocity.axes[0] = 0;
+}
