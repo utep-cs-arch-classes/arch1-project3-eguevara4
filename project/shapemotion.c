@@ -15,7 +15,7 @@
 #include <p2switches.h>
 #include <shape.h>
 #include <abCircle.h>
-
+#include "speaker.h"
 
 #define GREEN_LED BIT6
 
@@ -334,6 +334,7 @@ void main()
 
   configureClocks();
   lcd_init();
+  speaker_init();
   p2sw_init(15);
 
   layerInit(&shipLayer);
@@ -347,6 +348,7 @@ void main()
   drawString5x7(60,1,"Score:    0",COLOR_GRAY,COLOR_BLACK);
   drawString5x7(1,1,"Level:  1",COLOR_GRAY,COLOR_BLACK);
   drawString5x7(1,10,"Bombs:  1",COLOR_GRAY,COLOR_BLACK);
+  
   for(;;) { 
     while (!redrawScreen) { /**< Pause CPU if screen doesn't need updating */
       P1OUT &= ~GREEN_LED;    /**< Green led off witHo CPU */
@@ -364,12 +366,26 @@ void main()
 }
 
 char down = 0;
+u_int soundPeriod = 0;
+u_char soundPlaying = 0;
+u_int frequency = 500;
 /** Watchdog timer interrupt handler. 15 interrupts/sec */
 void wdt_c_handler()
 {
   static short count = 0;
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
   count ++;
+  if(soundPlaying){
+    soundPeriod++;
+    frequency += 100;
+    speaker_set_period(frequency);
+  }
+  if(soundPeriod > 20){
+    soundPeriod = 0;
+    soundPlaying = 0;
+    frequency = 200;
+    speaker_set_period(0);
+  }
   if (count == 15) {
     u_int switches = p2sw_read();
     if(!gameOn){
@@ -416,6 +432,8 @@ void wdt_c_handler()
 	ml5.layer->posNext.axes[0] = ml0.layer->posNext.axes[0];
 	ml5.layer->posNext.axes[1] = ml0.layer->posNext.axes[1];
 	ml5.layer->color = COLOR_GREEN;
+	speaker_set_period(frequency);
+	soundPlaying = 1;
       }
     }
     redrawScreen = 1;
