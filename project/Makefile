@@ -6,13 +6,13 @@ CFLAGS          	= -mmcu=${CPU} -Os -I../h -I../h
 CC              = msp430-elf-gcc
 AS              = msp430-elf-gcc -mmcu=${CPU} -c
 
-all:shapemotion.elf
+all:game.elf
 
 #additional rules for files
-shapemotion.elf: ${COMMON_OBJECTS} speaker.o shapemotion.o wdt_handler.o
+game.elf: ${COMMON_OBJECTS} speaker.o mainGame.o wdt_handler.o
 	${CC} -mmcu=${CPU}   -o $@ $^ -L../lib -lTimer -lLcd -lShape -lCircle -lp2sw
 
-load: shapemotion.elf
+load: game.elf
 	mspdebug rf2500 "prog $^"
 
 clean:
