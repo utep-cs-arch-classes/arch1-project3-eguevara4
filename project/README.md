@@ -53,7 +53,7 @@ Every 20 points a bomb is awarded.
 Every 10 points the level is increased.
 Once an asteroid crashes into the ship the game is over and the game must be reset.
 
-# Switch ship moving state
+# Switch Ship state
 
 ~~~
 if (~switches & 1){
@@ -70,4 +70,54 @@ if (~switches & 1){
   ml0.velocity.axes[0] = 0;
   ml5.velocity.axes[0] = 0;
 }
+~~~
+
+Assembly
+~~~
+                       .data
+switches             : .word                              ; switches is int
+ml0                  : .word                              ; ml0 is pointer
+ml5                  : .word                              ; ml5 is pointer
+
+                       .text
+switch1              :                                    ; start of state transition code
+                       mov   &switches , r12              ; r12 is switches
+		       mov   #-1       , r13              ; r13 is all 1s in binary
+		       xor   r12       , r13              ; effectively ~switches
+		       and   #1        , r13              ; and with 1
+		       cmp   #0        , r13              ; r13 - 0
+		       JZ    switch2
+		       mov   &ml0      , r4               ; r4 is ml0
+		       mov   2(r4)     , r5               ; r5 is ml0.velocity
+		       mov   #-3       , 0(r5)            ; ml0.velocity.axes[0] = -3
+		       mov   &ml5      , r6               ; r6 is ml5
+		       mov   2(r6)     , r7               ; r7 is ml5.velocity
+		       cmp   #0        , 2(r7)            ; ml5.velocity.axes[1] - 0
+		       JNZ   end
+		       mov   #-3       , 0(r7)            ; ml5.velocity.axes[0] = -3
+		       JMP   end
+
+switch2              : mov   &switches , r12              ; r12 is switches
+		       mov   #-1       , r13              ; r13 is all 1s in binary
+		       xor   r12       , r13              ; effectively ~switches
+		       and   #2        , r13              ; and with 2
+		       cmp   #0        , r13              ; r13 - 0
+		       JZ    not1or2
+		       mov   &ml0      , r4               ; r4 is ml0
+		       mov   2(r4)     , r5               ; r5 is ml0.velocity
+		       mov   #3        , 0(r5)            ; ml0.velocity.axes[0] = 3
+		       mov   &ml5      , r6               ; r6 is ml5
+		       mov   2(r6)     , r7               ; r7 is ml5.velocity
+		       cmp   #0        , 2(r7)            ; ml5.velocity.axes[1] - 0
+		       JNZ   end
+		       mov   #3        , 0(r7)            ; ml5.velocity.axes[0] = 3
+		       JMP   end
+
+not1or2              : mov   &ml0      , r4               ; r4 is ml0
+		       mov   2(r4)     , r5               ; r5 is ml0.velocity
+		       mov   #0        , 0(r5)            ; ml0.velocity.axes[0] = 0
+		       mov   &ml5      , r6               ; r6 is ml5
+		       mov   2(r6)     , r7               ; r7 is ml5.velocity
+		       mov   #0        , 0(r7)            ; ml5.velocity.axes[0] = 0
+end                  :                                    ; continue function
 ~~~
